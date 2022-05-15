@@ -333,6 +333,7 @@ def get_pymol_comand_for_color_list_of_residues_pic_and_movie(list_of_residues,c
     """
     assert len(name_of_selections) == len(list_of_residues) == len(colors) == len(name_of_selections),"the (name_of_selections,list_of_residues,colors) have to be the same length... yours is {},{},{}".format( len(name_of_selections),len(list_of_residues),len(name_of_selections))
     pymol.finish_launching()
+    cmd.bg_color("white")
     cmd.color("grey70","all")
     number_of_unique_chain = len(set(chains))
     print(str(number_of_unique_chain))

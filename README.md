@@ -38,4 +38,4 @@ name | type | explaination
 **together**                 | (<ins>bool</ins>)                  | spesify weather to take the image of all selection togher or for each selection make a seperate image. defult is False. for my opinion if their is not an overlap between the selection consider use together = True.
 **len_movie**                |(<ins>int</ins>)                    | if you want to generate a mpg file(movie) that is the protein that roll against y axis so spedify a number of frame you would like to have 240 is 8 second len of movie
 **dpi**                      | (<ins>int</ins>)                   | the dpi of the image 150 is fine for a scatch consider dpi=300 for an article view
-**ray**                      |(<ins>int 0 or 1 </ins>)                    | is to make the image ray, it add a value to the 3D texture it is nice for an article but it is a time  expensive
+**ray**                      |(<ins>int 0 or 1 </ins>)            | is to make the image ray, it add a value to the 3D texture it is nice for an article but it is a time  expensive
