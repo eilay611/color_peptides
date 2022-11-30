@@ -29,6 +29,8 @@ def picture_alot_of_all(output_folder_path,name=""):
 
 cmd.extend("picture", picture_alot_of_all)
 op="/run/user/29999/gvfs/smb-share:server=132.72.92.166,share=eilay/beackup_to_linux_server/cov2_280822/regardent/analyzide_data/midi_bigger_cmpnd/pdb_abs_align/representive_1percluster_pics/RBD"
+op="/run/user/29999/gvfs/smb-share:server=132.72.92.166,share=eilay/beackup_to_linux_server/cov2_280822/regardent/analyzide_data/midi_bigger_cmpnd/pdb_abs_align/representive_1percluster_pics/RBD/b_factorize/binary"
+op="/run/user/29999/gvfs/smb-share:server=132.72.92.166,share=eilay/beackup_to_linux_server/cov2_280822/regardent/analyzide_data/midi_bigger_cmpnd/pdb_abs_align/representive_togther_pics/NTD"
 def picture_roll(output_folder_path=op,bg="white",axis = "y",number_of_shots=8,angle=None,name="",width=0, height=0, dpi=300, ray=0, quiet=1):
     cmd.bg_color(bg)
     counter = 0
@@ -69,12 +71,20 @@ cmd.extend("color_every_resi_by_list_of_rgb_colors", picture_roll)
 # run /home/oem/PycharmProjects/color_peptides/pic.py
 # picture_roll(output_folder_path=op,axis = "y",number_of_shots=5,angle=120/5,name="",width=0, height=0, dpi=300, ray=1, quiet=1)
 #picture_roll(output_folder_path=os.path.join(op,"5"),name="cluster5")
-def movie_eilay(len_movie=240,output_folder_path=op,bg="white",name=""):
+def movie_eilay(len_movie=360,output_folder_path=op,bg="white",name=""):
     cmd.bg_color(bg)
     cmd.mset("try", len_movie + 1)
     util.mroll(0, len_movie, False)
     movie.produce(os.path.join(output_folder_path, name) + ".mpg")
 cmd.extend("movie_eilay", movie_eilay)
+
+
+def picture_roll_and_movie(output_folder_path=op,bg="white",axis = "y",len_movie=360,number_of_shots=8,name="",width=0, height=0, dpi=300, ray=0, quiet=1):
+    picture_roll(output_folder_path=output_folder_path, bg=bg, axis=axis, number_of_shots=number_of_shots, angle=None, name=name, width=width, height=height,
+                 dpi=dpi, ray=ray, quiet=quiet)
+    movie_eilay(len_movie=len_movie, output_folder_path=output_folder_path, bg=bg, name=name)
+cmd.extend("picture_roll_and_movie", picture_roll_and_movie)
+
 
 def pic_every_obgect_alone(output_folder_path=op,bg="white",name="",width=0, height=0, dpi=300, ray=0, quiet=1,shots=[],object_map_name={}):
     """
@@ -95,7 +105,7 @@ def pic_every_obgect_alone(output_folder_path=op,bg="white",name="",width=0, hei
         shots.append(cmd.get_view())
     cmd.bg_color(bg)
     all_obgects = cmd.get_names('objects', 0, '(all)')
-    #cmd.disable("all")
+    cmd.disable(" ".join(all_obgects))
     counter=0
     if type(shots) == type(8):
         shots_new=[]
@@ -121,7 +131,7 @@ cmd.extend("pic_every_obgect_alone", pic_every_obgect_alone)
 def movie_every_obgect_alone(output_folder_path=op,bg="white",name="",len_movie=240,object_map_name={}):
     cmd.bg_color(bg)
     all_obgects = cmd.get_names('objects', 0, '(all)')
-    #cmd.disable("all")
+    cmd.disable(" ".join(all_obgects))
     for obj in all_obgects:
         map_obj = obj
         if object_map_name != {}:
@@ -134,7 +144,47 @@ def movie_every_obgect_alone(output_folder_path=op,bg="white",name="",len_movie=
         cmd.disable(obj)
 cmd.extend("movie_every_obgect_alone", movie_every_obgect_alone)
 
+def get_groups():
+    groups_names = set(cmd.get_names("objects")).difference(cmd.get_object_list("all"))
+    dict_of_groups = {}
+    for groups_name in groups_names:
+        dict_of_groups[groups_name] = cmd.get_object_list(groups_name)
+    return dict_of_groups
+cmd.extend("get_groups", get_groups)
 
+
+def pic_every_group_alone(output_folder_path=op,bg="white",name="",width=0, height=0, dpi=300, ray=0, quiet=1,shots=[],group_map_name={}):
+    if type(shots)== []:
+        shots.append(cmd.get_view())
+    cmd.bg_color(bg)
+    all_obgects = cmd.get_names('objects', 0, '(all)')
+    cmd.disable(" ".join(all_obgects))
+    counter=0
+    if type(shots) == type(8):
+        shots_new=[]
+        for i in range (shots):
+            shots_new.append(cmd.get_view())
+            cmd.turn("y", 360/shots)
+        shots = shots_new
+    groups = get_groups()
+    for shot in shots:
+        cmd.set_view(shot)
+        for group in groups.keys():
+            map_obj=group
+            if group_map_name != {}:
+                try:
+                    map_obj = group_map_name[group[:6]]########the :6 is cutomize
+                except:
+                    continue
+            cmd.enable(group)
+            for obj in groups[group]:
+                cmd.enable(obj)
+            cmd.png(os.path.join(output_folder_path, "{}_{}_{}.png".format(counter,name,map_obj)), width=width, height=height, dpi=dpi, ray=ray, quiet=quiet)
+            cmd.disable(group)
+        counter+=1
+cmd.extend("pic_every_group_alone", pic_every_group_alone)
+
+#pic_every_group_alone(output_folder_path=op,bg="white",name="",width=0, height=0, dpi=500, ray=0, quiet=1,shots=8,group_map_name={})
 
 # pic_every_obgect_alone(dpi=500,ray=0,shots=[
 # (
@@ -192,7 +242,7 @@ cmd.extend("movie_every_obgect_alone", movie_every_obgect_alone)
 #
 
 #picture_roll(output_folder_path=op,bg="white",axis = "y",number_of_shots=8,angle=None,name="all_togther_no_singleton",width=0, height=0, dpi=500, ray=0, quiet=1)
-
+#
 # mapper={"cluster1": "6XEYKJ",
 # "cluster2": "7JW0FG",
 # "cluster3": "7KMHBA",
@@ -222,3 +272,31 @@ cmd.extend("movie_every_obgect_alone", movie_every_obgect_alone)
 #  shots=8)
 
 #picture_roll(output_folder_path=op,bg="white",axis = "y",number_of_shots=8,angle=None,name="all_tother",width=0, height=0, dpi=500, ray=0, quiet=1)
+
+# cmd.set_color( "cluster1", [0.8941176470588236, 0.10196078431372549, 0.10980392156862745])
+# cmd.set_color(  "cluster2", [0.21568627450980393, 0.49411764705882355, 0.7215686274509804])
+# cmd.set_color(  "cluster3", [0.30196078431372547, 0.6862745098039216, 0.2901960784313726])
+# cmd.set_color(  "cluster4", [0.596078431372549, 0.3058823529411765, 0.6392156862745098])
+# cmd.set_color(  "cluster5", [1.0, 0.4980392156862745, 0.0])
+# cmd.set_color(  "cluster6", [1.0, 1.0, 0.2])
+# cmd.set_color(  "cluster7", [0.6509803921568628, 0.33725490196078434, 0.1568627450980392])
+# cmd.set_color(  "cluster8", [0.9686274509803922, 0.5058823529411764, 0.7490196078431373])
+# cmd.set_color(  "cluster9", [0.10196078431372549, 0.8196078431372549, 1.0])
+# cmd.set_color(  "cluster10", [0.3, 0.3, 0.3])
+# cmd.set_color(  "cluster11",[0.4, 0.4, 0.4])
+# cmd.set_color(  "cluster12", [0.8, 0.6, 1.0])
+# cmd.set_color(  "cluster13",[0.7058823529411765, 0.6274509803921569, 0.39215686274509803])
+# cmd.set_color(  "cluster14", [0.7019607843137254, 0.0, 0.5254901960784314])
+# cmd.set_color(  "cluster15",[0.0, 0.2, 0.8])
+# cmd.set_color(  "cluster16", [0.5,0.5,0.5])
+# cmd.set_color(  "cluster17",[0.6,0.6,0.6])
+# cmd.set_color(  "cluster18", [0.7,0.7,0.7])
+# cmd.set_color(  "cluster19",[0.8,0.8,0.8])
+# cmd.set_color(  "cluster20",[0.9,0.9,0.9])
+#
+# for obj in cmd.get_object_list('all'):
+#     cmd.color(mapper[obj.split("_")[0]],obj+" and chain "+obj.split("_")[-1])
+#     cmd.set_name(obj,mapper[obj.split("_")[0]]+"_"+obj.split("_")[0]+"_"+obj.split("_")[-1])
+#
+#
+
